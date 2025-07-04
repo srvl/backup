@@ -77,22 +77,22 @@ async fn main() -> Result<()> {
 async fn run() -> Result<()> {
     color_eyre::install()?;
     
-    println!("Enter your Bloom panel API key:");
-    let mut bloom_api_key = String::new();
+    println!("Enter your ATBP Hosting panel API key:");
+    let mut atbp_api_key = String::new();
     let stdin = io::stdin();
     let mut reader = BufReader::new(stdin);
-    reader.read_line(&mut bloom_api_key).await?;
-    let bloom_api_key = bloom_api_key.trim().to_string();
+    reader.read_line(&mut atbp_api_key).await?;
+    let atbp_api_key = atbp_api_key.trim().to_string();
 
-    println!("Enter your Bloom panel URL (or press Enter for default mc.bloom.host):");
-    let mut bloom_panel_url = String::new();
-    reader.read_line(&mut bloom_panel_url).await?;
-    let bloom_panel_url = bloom_panel_url.trim();
+    println!("Enter your ATBP Hosting panel URL (or press Enter for default panel.atbphosting.com):");
+    let mut atbp_panel_url = String::new();
+    reader.read_line(&mut atbp_panel_url).await?;
+    let atbp_panel_url = atbp_panel_url.trim();
     
-    let bloom_panel_url = if bloom_panel_url.is_empty() {
-        "https://mc.bloom.host".to_string()
+    let atbp_panel_url = if atbp_panel_url.is_empty() {
+        "https://panel.atbphosting.com".to_string()
     } else {
-        format!("https://{}", bloom_panel_url)
+        format!("https://{}", atbp_panel_url)
     };
 
     execute!(std::io::stdout(), Clear(ClearType::All))?;
@@ -102,7 +102,7 @@ async fn run() -> Result<()> {
         .build()?;
     
     // Fetch servers
-    let servers = fetch_servers(&client, &bloom_panel_url, &bloom_api_key).await?;
+    let servers = fetch_servers(&client, &atbp_panel_url, &atbp_api_key).await?;
     if servers.is_empty() {
         println!("No servers found.");
         return Ok(());
@@ -115,7 +115,7 @@ async fn run() -> Result<()> {
     let selected_server_short_uuid = &servers[selected_server].identifier;
 
     // Fetch backups for the selected server
-    let backups = fetch_backups(&client, &bloom_panel_url, &bloom_api_key, selected_server_uuid).await?;
+    let backups = fetch_backups(&client, &atbp_panel_url, &atbp_api_key, selected_server_uuid).await?;
     if backups.is_empty() {
         println!("No backups found for the selected server.");
         return Ok(());
@@ -126,7 +126,7 @@ async fn run() -> Result<()> {
     // Select a backup from the UI (display name + date)
     let selected_backup = select_from_list("Backups:", &backups, display_backup)?;
 
-    let backup_url = generate_backup_dl_link(&client, &bloom_panel_url, &bloom_api_key, selected_server_short_uuid, &backups[selected_backup].uuid).await?;
+    let backup_url = generate_backup_dl_link(&client, &atbp_panel_url, &atbp_api_key, selected_server_short_uuid, &backups[selected_backup].uuid).await?;
 
     download_backup(&client, &backup_url, &backups[selected_backup].uuid, backups[selected_backup].bytes).await?;
 
